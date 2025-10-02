@@ -1,0 +1,481 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ITI Trainee Days</title>
+    <style>
+        @media print {
+            body { background: white; }
+            .stats, .controls { display: none; }
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        
+        h1 {
+            font-size: 36px;
+            font-weight: 700;
+            color: #2d3748;
+            margin-bottom: 8px;
+        }
+        
+        .subtitle {
+            font-size: 16px;
+            color: #718096;
+            margin-bottom: 20px;
+        }
+        
+        .stats {
+            display: flex;
+            justify-content: center;
+            gap: 30px;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+        }
+        
+        .stat-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px 30px;
+            border-radius: 12px;
+            text-align: center;
+            min-width: 150px;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+        }
+        
+        .stat-number {
+            font-size: 32px;
+            font-weight: 700;
+            margin-bottom: 5px;
+        }
+        
+        .stat-label {
+            font-size: 14px;
+            opacity: 0.9;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        
+        .controls {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+        }
+        
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .btn-primary {
+            background: #48bb78;
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background: #38a169;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(72, 187, 120, 0.4);
+        }
+        
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background: #e2e8f0;
+            border-radius: 10px;
+            overflow: hidden;
+            margin: 20px 0;
+        }
+        
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #48bb78 0%, #38a169 100%);
+            transition: width 0.5s ease;
+            border-radius: 10px;
+        }
+        
+        .months-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 30px;
+        }
+        
+        .month {
+            background: #f7fafc;
+            padding: 24px;
+            border-radius: 16px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+            transition: transform 0.3s;
+        }
+        
+        .month:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.12);
+        }
+        
+        .month-title {
+            font-size: 20px;
+            font-weight: 700;
+            margin-bottom: 16px;
+            color: #2d3748;
+            text-align: center;
+            padding-bottom: 12px;
+            border-bottom: 3px solid #667eea;
+        }
+        
+        .days-header {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 4px;
+            margin-bottom: 10px;
+        }
+        
+        .day-name {
+            text-align: center;
+            font-size: 12px;
+            font-weight: 700;
+            color: #718096;
+            padding: 8px 0;
+            text-transform: uppercase;
+        }
+        
+        .days-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 4px;
+        }
+        
+        .day {
+            aspect-ratio: 1;
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            font-weight: 600;
+            color: #4a5568;
+            background: white;
+            cursor: pointer;
+            transition: all 0.3s;
+            position: relative;
+            user-select: none;
+        }
+        
+        .day:hover:not(.empty):not(.disabled) {
+            transform: scale(1.05);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+            border-color: #667eea;
+        }
+        
+        .day.empty {
+            border: none;
+            background: transparent;
+            cursor: default;
+        }
+        
+        .day.disabled {
+            background: #f7fafc;
+            color: #cbd5e0;
+            border-color: #e2e8f0;
+            cursor: not-allowed;
+        }
+        
+        .day.active {
+            border-color: #667eea;
+            background: white;
+        }
+        
+        .day.checked {
+            background: linear-gradient(135deg, #48bb78 0%, #38a169 100%);
+            color: white;
+            border-color: #48bb78;
+            animation: checkPop 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+        }
+        
+        .day.checked::after {
+            content: '✓';
+            position: absolute;
+            font-size: 24px;
+            font-weight: 700;
+            animation: checkmarkAppear 0.4s ease-out;
+        }
+        
+        .day.today {
+            box-shadow: 0 0 0 3px #fbbf24;
+            border-color: #f59e0b;
+        }
+        
+        @keyframes checkPop {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.2); }
+            100% { transform: scale(1); }
+        }
+        
+        @keyframes checkmarkAppear {
+            0% { 
+                opacity: 0;
+                transform: scale(0) rotate(-45deg);
+            }
+            100% { 
+                opacity: 1;
+                transform: scale(1) rotate(0deg);
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .container {
+                padding: 20px;
+            }
+            
+            h1 {
+                font-size: 28px;
+            }
+            
+            .months-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🎯 ITI Trainee Days</h1>
+            <div class="subtitle">October 12, 2025 - June 30, 2026</div>
+            
+            <div class="stats">
+                <div class="stat-card">
+                    <div class="stat-number" id="checkedDays">0</div>
+                    <div class="stat-label">Days Completed</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" id="totalDays">0</div>
+                    <div class="stat-label">Total Days</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" id="percentage">0%</div>
+                    <div class="stat-label">Progress</div>
+                </div>
+            </div>
+            
+            <div class="progress-bar">
+                <div class="progress-fill" id="progressFill"></div>
+            </div>
+            
+            <div class="controls">
+                <button class="btn btn-primary" onclick="checkToday()">✓ Check Today</button>
+            </div>
+        </div>
+        
+        <div class="months-grid" id="calendar"></div>
+    </div>
+
+    <script>
+        const monthNames = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+        const dayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+        
+        const STORAGE_KEY = 'itiTraineeDaysData';
+        let checkedDays = {};
+        
+        function loadData() {
+            const saved = localStorage.getItem(STORAGE_KEY);
+            if (saved) {
+                try {
+                    checkedDays = JSON.parse(saved);
+                } catch (e) {
+                    checkedDays = {};
+                }
+            }
+        }
+        
+        function saveData() {
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(checkedDays));
+            updateStats();
+        }
+        
+        function getDaysInMonth(year, month) {
+            return new Date(year, month + 1, 0).getDate();
+        }
+        
+        function getFirstDayOfMonth(year, month) {
+            return new Date(year, month, 1).getDay();
+        }
+        
+        function formatDate(year, month, day) {
+            return `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+        }
+        
+        function isToday(year, month, day) {
+            const today = new Date();
+            return today.getFullYear() === year && 
+                   today.getMonth() === month && 
+                   today.getDate() === day;
+        }
+        
+        function toggleDay(year, month, day) {
+            const dateKey = formatDate(year, month, day);
+            if (checkedDays[dateKey]) {
+                delete checkedDays[dateKey];
+            } else {
+                checkedDays[dateKey] = true;
+            }
+            saveData();
+            renderCalendar();
+        }
+        
+        function checkToday() {
+            const today = new Date();
+            const dateKey = formatDate(today.getFullYear(), today.getMonth(), today.getDate());
+            
+            const startDate = new Date(2025, 9, 12);
+            const endDate = new Date(2026, 5, 30);
+            const todayDate = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+            
+            if (todayDate >= startDate && todayDate <= endDate) {
+                checkedDays[dateKey] = true;
+                saveData();
+                renderCalendar();
+            } else {
+                alert('Today is not within the tracking period (Oct 12, 2025 - Jun 30, 2026)');
+            }
+        }
+        
+        function updateStats() {
+            const allDates = [];
+            let current = new Date(2025, 9, 12);
+            const end = new Date(2026, 5, 30);
+            
+            while (current <= end) {
+                allDates.push(formatDate(current.getFullYear(), current.getMonth(), current.getDate()));
+                current.setDate(current.getDate() + 1);
+            }
+            
+            const totalDays = allDates.length;
+            const checked = Object.keys(checkedDays).length;
+            const percentage = totalDays > 0 ? Math.round((checked / totalDays) * 100) : 0;
+            
+            document.getElementById('checkedDays').textContent = checked;
+            document.getElementById('totalDays').textContent = totalDays;
+            document.getElementById('percentage').textContent = percentage + '%';
+            document.getElementById('progressFill').style.width = percentage + '%';
+        }
+        
+        function createMonthCalendar(year, month, startDay = 1, endDay = null) {
+            const daysInMonth = getDaysInMonth(year, month);
+            const firstDay = getFirstDayOfMonth(year, month);
+            const actualEndDay = endDay || daysInMonth;
+            
+            const monthDiv = document.createElement('div');
+            monthDiv.className = 'month';
+            
+            const title = document.createElement('div');
+            title.className = 'month-title';
+            title.textContent = `${monthNames[month]} ${year}`;
+            monthDiv.appendChild(title);
+            
+            const daysHeader = document.createElement('div');
+            daysHeader.className = 'days-header';
+            dayNames.forEach(day => {
+                const dayName = document.createElement('div');
+                dayName.className = 'day-name';
+                dayName.textContent = day;
+                daysHeader.appendChild(dayName);
+            });
+            monthDiv.appendChild(daysHeader);
+            
+            const daysGrid = document.createElement('div');
+            daysGrid.className = 'days-grid';
+            
+            for (let i = 0; i < firstDay; i++) {
+                const emptyDay = document.createElement('div');
+                emptyDay.className = 'day empty';
+                daysGrid.appendChild(emptyDay);
+            }
+            
+            for (let day = 1; day <= daysInMonth; day++) {
+                const dayDiv = document.createElement('div');
+                dayDiv.className = 'day';
+                
+                if (day < startDay || day > actualEndDay) {
+                    dayDiv.classList.add('disabled');
+                    dayDiv.textContent = day;
+                } else {
+                    dayDiv.classList.add('active');
+                    const dateKey = formatDate(year, month, day);
+                    
+                    if (checkedDays[dateKey]) {
+                        dayDiv.classList.add('checked');
+                    }
+                    
+                    if (isToday(year, month, day)) {
+                        dayDiv.classList.add('today');
+                    }
+                    
+                    dayDiv.textContent = day;
+                    dayDiv.onclick = () => toggleDay(year, month, day);
+                }
+                
+                daysGrid.appendChild(dayDiv);
+            }
+            
+            monthDiv.appendChild(daysGrid);
+            return monthDiv;
+        }
+        
+        function renderCalendar() {
+            const calendar = document.getElementById('calendar');
+            calendar.innerHTML = '';
+            
+            calendar.appendChild(createMonthCalendar(2025, 9, 12));
+            calendar.appendChild(createMonthCalendar(2025, 10));
+            calendar.appendChild(createMonthCalendar(2025, 11));
+            calendar.appendChild(createMonthCalendar(2026, 0));
+            calendar.appendChild(createMonthCalendar(2026, 1));
+            calendar.appendChild(createMonthCalendar(2026, 2));
+            calendar.appendChild(createMonthCalendar(2026, 3));
+            calendar.appendChild(createMonthCalendar(2026, 4));
+            calendar.appendChild(createMonthCalendar(2026, 5, 1, 30));
+            
+            updateStats();
+        }
+        
+        loadData();
+        renderCalendar();
+    </script>
+</body>
+</html>
